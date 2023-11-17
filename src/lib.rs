@@ -3,6 +3,8 @@ use fixedbitset::FixedBitSet;
 use js_sys::Math;
 use wasm_bindgen::prelude::*;
 
+const SIZE: u32 = 512;
+
 #[wasm_bindgen]
 extern "C" {
     fn alert(s: &str);
@@ -26,8 +28,8 @@ pub struct Universe {
 #[wasm_bindgen]
 impl Universe {
     pub fn new() -> Self {
-        let width = 128;
-        let height = 128;
+        let width = SIZE;
+        let height = SIZE;
 
         let size = (width * height) as usize;
         let mut cells = FixedBitSet::with_capacity(size);

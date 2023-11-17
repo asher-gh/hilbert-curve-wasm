@@ -1,5 +1,5 @@
-import { Universe } from "conway-gol-wasm";
-import { memory } from "conway-gol-wasm/conway_gol_wasm_bg.wasm";
+import { Universe } from "hilbert-curve-wasm";
+import { memory } from "hilbert-curve-wasm/hilbert_curve_wasm_bg.wasm";
 
 const CELL_SIZE = 5; // px
 const GRID_COLOR = "#CCCCCC";

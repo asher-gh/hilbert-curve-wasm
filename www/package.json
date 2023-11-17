@@ -1,7 +1,7 @@
 {
-  "name": "conway-gol-client",
+  "name": "hilbert-curve-client",
   "version": "0.1.0",
-  "description": "Conway game of life user interface.",
+  "description": "Hilber curve rendering.",
   "main": "index.js",
   "bin": {
     "create-wasm-app": ".bin/create-wasm-app.js"
@@ -19,12 +19,9 @@
   ],
   "author": "Asher <ashish.2017@hotmail.com>",
   "license": "(MIT OR Apache-2.0)",
-  "bugs": {
-    "url": "https://github.com/rustwasm/create-wasm-app/issues"
-  },
   "devDependencies": {
-    "conway-gol-wasm": "file:../pkg",
-    "copy-webpack-plugin": "5.0.0",
+    "hilbert-curve-wasm": "file:../pkg",
+    "copy-webpack-plugin": "^5.0.0",
     "eslint": "8.53.0"
   },
   "dependencies": {
