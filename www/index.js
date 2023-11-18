@@ -1,77 +1,71 @@
 import * as d3 from "d3";
-
-function rot(n, x, y, rx, ry) {
-  if (ry === 0) {
-    if (rx === 1) {
-      x[0] = n - 1 - x[0];
-      y[0] = n - 1 - y[0];
-    }
-
-    // Swap x and y
-    let t = x[0];
-    x[0] = y[0];
-    y[0] = t;
-  }
-}
-
-function d2xy(n, d, x, y) {
-  let rx, ry;
-  x[0] = y[0] = 0;
-  for (let s = 1; s < n; s *= 2) {
-    rx = 1 & (d / 2);
-    ry = 1 & (d ^ rx);
-    rot(s, x, y, rx, ry);
-    x[0] += s * rx;
-    y[0] += s * ry;
-    d /= 4;
-  }
-}
+import { HilbertCurve } from "hilbert-curve-wasm";
+import { memory } from "hilbert-curve-wasm/hilbert_curve_wasm_bg.wasm";
 
 function drawHilbertCurve(order) {
   const n = Math.pow(2, order);
-  const maxD = n * n;
-  const points = [];
+  let hc = HilbertCurve.new(order);
+  const flatPoints = new Uint32Array(
+    memory.buffer,
+    hc.points(),
+    hc.points_len(),
+  );
 
-  for (let d = 0; d < maxD; d++) {
-    let x = [0],
-      y = [0];
-    d2xy(n, d, x, y);
-    points.push([x[0], y[0]]);
+  if (flatPoints.length % 2 !== 0) {
+    console.error("The length of flatPoints array is not even.");
+  } else {
+    // numberof points = 2^(2*order), eg. for order=10, there are ~1M points
+    const points = [];
+
+    for (let i = 0; i < flatPoints.length; i += 2) {
+      points.push([flatPoints[i], flatPoints[i + 1]]);
+    }
+    // Get viewport dimensions
+    const width =
+      window.innerWidth ||
+      document.documentElement.clientWidth ||
+      document.body.clientWidth;
+    const height =
+      window.innerHeight ||
+      document.documentElement.clientHeight ||
+      document.body.clientHeight;
+
+    let size = width <= height ? width : height;
+    size = size * 0.9;
+
+    const svg = d3
+      .select("#hilbertContainer")
+      .append("svg")
+      .attr("width", size)
+      .attr("height", size)
+      .call(
+        d3
+          .zoom()
+          .scaleExtent([1, 40])
+          .wheelDelta((event) => -event.deltaY * 0.001)
+          .on("zoom", (event) => {
+            container.attr("transform", event.transform);
+          }),
+      );
+
+    const container = svg.append("g");
+
+    const line = d3
+      .line()
+      .x((d) => d[0] * (size / n))
+      .y((d) => d[1] * (size / n));
+
+    container
+      .append("path")
+      .datum(points)
+      .attr("d", line)
+      .attr("stroke", "black")
+      .attr("stroke-width", 0.7)
+      .attr("fill", "none");
   }
-
-  const svg = d3
-    .select("#hilbertContainer")
-    .append("svg")
-    .attr("width", 600)
-    .attr("height", 600)
-    .call(
-      d3
-        .zoom()
-        .scaleExtent([1, 40])
-        .wheelDelta((event) => -event.deltaY * 0.001)
-        .on("zoom", (event) => {
-          container.attr("transform", event.transform);
-        }),
-    )
-    .append("g");
-
-  const container = svg.append("g");
-
-  const line = d3
-    .line()
-    .x((d) => d[0] * (600 / n))
-    .y((d) => d[1] * (600 / n));
-
-  container
-    .append("path")
-    .datum(points)
-    .attr("d", line)
-    .attr("stroke", "black")
-    .attr("stroke-width", 0.5)
-    .attr("fill", "none");
 }
 
-drawHilbertCurve(11); // Change the order here
+drawHilbertCurve(10); // Change the order here
 
 // ----------------------- disable browser's zoom ----------------------
 
